@@ -20,7 +20,7 @@ The receiver can be reached over **RS-232** (a USB-to-serial adapter on the Pi) 
 | `Denon.Telnet.Test` | Command-line tool: send commands to the receiver over the network and print the replies. |
 | `Denon.Serial.Test` | Command-line tool for the serial port. **Its own repository** ([denon.serial.test](https://github.com/jeffreymonroe/denon.serial.test)); the folder is ignored here. |
 
-`Docs/` holds notes on undocumented commands and the receiver's UPnP service descriptions. The command set comes from Denon's **AVR-4308CI RS-232C/Ethernet protocol** document (version 5.1.0), available from Denon's support site; it is not included here.
+`Docs/` holds notes on undocumented commands and the receiver's UPnP service descriptions. The command set comes from Denon's [AVR-4308CI control protocol, version 5.1.0a](https://assets.denon.com/documentmaster/us/avr-4308ciserialprotocol_ver510a.pdf) (PDF on Denon's site; not included here).
 
 ## How it behaves
 
