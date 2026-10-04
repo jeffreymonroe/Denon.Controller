@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Denon.Core.Model\Denon.Core.Model.csproj" />
+    <ProjectReference Include="..\Denon.Core.Telnet\Denon.Core.Command.csproj" />
+  </ItemGroup>
+
+
+</Project>

@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<scpd
+  xmlns="urn:schemas-upnp-org:service-1-0">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<actionList>
+		<action>
+			<name>actHtmlDeviceName</name>
+			<argumentList>
+				<argument>
+					<name>argHtmlDeviceName</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlDeviceName</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>actHtmlRefresh</name>
+			<argumentList>
+				<argument>
+					<name>argHtmlRefresh</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlRefresh</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>actHtmlTcpip</name>
+			<argumentList>
+				<argument>
+					<name>argHtmlDHCPFlag</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlDHCPFlag</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlIPAddress</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlIPAddress</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlNetMask</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlNetMask</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlDNS1</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlDNS1</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlDNS2</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlDNS2</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlGateway</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlGateway</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlProxyFlag</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlProxyFlag</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlProxyName</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlProxyName</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>argHtmlProxyPort</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlProxyPort</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>actHtmlIrControl</name>
+			<argumentList>
+				<argument>
+					<name>argIrControl</name>
+					<direction>in</direction>
+					<relatedStateVariable>varHtmlIrCommand</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+	</actionList>
+	<serviceStateTable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlDeviceName</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlDHCPFlag</name>
+			<dataType>boolean</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlIPAddress</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlNetMask</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlDNS1</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlDNS2</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlGateway</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlProxyFlag</name>
+			<dataType>boolean</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlProxyName</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlProxyPort</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlIrCommand</name>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable sendEvents="no">
+			<name>varHtmlRefresh</name>
+			<dataType>string</dataType>
+		</stateVariable>
+	</serviceStateTable>
+</scpd>

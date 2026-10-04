@@ -1,0 +1,900 @@
+﻿@{
+    ViewData["Title"] = "Denon Remote";
+}
+<style>
+    html, body {
+        height: 100%;
+    }
+
+    .form-switch .form-check-input[type=checkbox] {
+        border-radius: 2em;
+        height: 25px;
+        width: 50px;
+    }
+
+    .accordion-item {
+        border-color: gray;
+    }
+</style>
+<div class="container-fluid vh-100">
+
+    @if (!string.IsNullOrEmpty(Model.StartupError))
+    {
+        <div class="alert alert-danger mt-3 mx-auto" style="max-width: 600px;" role="alert">
+            <h4 class="alert-title">Remote unavailable</h4>
+            <p>@Model.StartupError</p>
+            <button type="button" class="btn btn-light" onclick="location.reload()">Retry</button>
+        </div>
+    }
+
+    <div class="accordion" id="zoneSettings">
+        @foreach (var zone in Model.Configuration.Zones)
+        {
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="@(zone.Id)ZoneHeading">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse@(zone.Id)Zone" aria-expanded="true" aria-controls="collapse@(zone.Id)Zone">
+                        @(zone.Name)
+                    </button>
+                </h2>
+                <div id="collapse@(zone.Id)Zone" class="accordion-collapse collapse" aria-labelledby="@(zone.Id)ZoneHeading" data-bs-parent="#zoneSettings">
+                    <div class="accordion-body">
+                        <div class="row justify-content-around pl-2 pr-2">
+                            <div class="col-2">
+                                <div class="form-group form-inline" style="float:right;">
+                                    <label class="form-check-label" for="powerState">Power</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input powerState" type="checkbox" id="powerState@(zone.Id)" data-zone="@(zone.Id)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2 offset-2">
+                                <div class="form-group form-inline">
+                                    <label class="form-check-label" for="muteState">Mute</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input muteState" type="checkbox" id="muteState@(zone.Id)" data-zone="@(zone.Id)" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row h-75 justify-content-around">
+                            <div class="col-12 text-center">
+                                <div class="volumeDialWrapper">
+                                    <input id="volumeState@(zone.Id)" type="text" value="75" class="volumeDial" data-zone="@(zone.Id)" data-max="98" data-limit="@((zone.MaxVolume ?? 98m).ToString(System.Globalization.CultureInfo.InvariantCulture))" data-thickness=".25" data-width="300" data-height="300" data-angleOffset="-145" data-angleArc="290" data-linecap="round" data-stopper="false" data-fgColor="#2a9fd6" data-inputColor="#2a9fd6">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-around pl-5 pr-5">
+                            <div class="col text-center">
+                                <label for="sourceState" class="form-label">Source</label>
+                                <select id="sourceSelect@(zone.Id)" class="form-select sourceSelect" aria-label="Source" data-zone="@(zone.Id)">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    @if (string.IsNullOrEmpty(Model.StartupError))
+    {
+        <div class="row justify-content-around">
+            <div class="col-4 p-2 text-center">
+                <input class="btn btn-outline-secondary btn-sm refreshButton" type="button" value="Refresh">
+            </div>
+        </div>
+    }
+
+</div>
+
+<style>
+    #loading {
+        position: fixed;
+        display: block;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        text-align: center;
+        opacity: 0.7;
+        background-color: #fff;
+        z-index: 99;
+    }
+
+    .alert-title {
+        display: inline;
+    }
+
+    .alert-message {
+        display: block;
+        margin-top: 5px;
+    }
+
+    /* Error and status messages: centered on screen, above the loading spinner (z-index 99). */
+    #alertWrapper {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(90vw, 600px);
+        z-index: 999;
+    }
+
+        #alertWrapper .alert {
+            width: 100%;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+        }
+
+    /* Dev check: receiver model and the remote/API versions, pinned to the bottom. */
+    .app-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 2px 8px;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #888;
+        background: rgba(0, 0, 0, 0.75);
+        pointer-events: none;
+        z-index: 50;
+    }
+
+    /* Keep the last controls clear of the footer. */
+    #zoneSettings {
+        margin-bottom: 1.75rem;
+    }
+</style>
+
+<div id="loading" class="d-flex align-items-center justify-content-center">
+    <div class="spinner-border text-info" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+    </symbol>
+    <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+    </symbol>
+    <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+    </symbol>
+</svg>
+<div id="alertWrapper">
+</div>
+
+<footer class="app-footer">
+    @(string.IsNullOrEmpty(Model.Configuration?.Model) ? "Receiver unknown" : Model.Configuration.Model)
+    | Remote @Denon.Web.Remote.Models.HomeViewModel.ShortVersion(Model.RemoteVersion)
+    | API @(string.IsNullOrEmpty(Model.Configuration?.ApiVersion) ? "unavailable" : Denon.Web.Remote.Models.HomeViewModel.ShortVersion(Model.Configuration.ApiVersion))
+</footer>
+
+<script>
+    var volumeSetIncrement = 5;
+    var volumeDials = [];
+    var lastVolumeStep = 0;
+    // True while a dial is being updated from the receiver's status, so that update isn't
+    // sent back to the receiver as a new volume level.
+    var suppressVolumeSend = false;
+
+    // Error text from a failed API call. responseJSON is missing when the API can't be
+    // reached at all, and reading .title from it used to throw and stop the page's setup.
+    function apiErrorText(jqxhr) {
+        if (jqxhr && jqxhr.responseJSON && jqxhr.responseJSON.title) return jqxhr.responseJSON.title;
+        if (!jqxhr || jqxhr.status === 0) return "Can't reach the remote API.";
+        return "Request failed (" + jqxhr.status + ").";
+    }
+    var timeoutRatio = @Model.TimeoutRatio;
+
+    (function($){
+        $.fn.extend({
+            bs_alert: function (message, title) {
+                // Several status requests fail together when the receiver is off; show one alert, not a dozen.
+                var shown = $(this).find('.alert-danger .alert-message').filter(function () { return $(this).text() === String(message); });
+                if (shown.length) return;
+                message = $('<span>').text(message).html();
+                var id = "alert-" + Date.now();
+                var cls='alert-danger';
+                var html='<div id="'+id+'" class="alert '+cls+' alert-dismissible fade show mb-1 col-10 mx-auto"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>';
+                if(typeof title!=='undefined' &&  title!==''){
+                    html+='<h4 class="alert-title">'+title+'</h4>';
+                }
+                html += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                html +='<span class="alert-message">'+message+'</span></div>';
+                $(this).append(html);
+                setTimeout(function () { $("#"+id).alert('close'); }, 5000);
+            },
+            bs_warning: function(message, title){
+                var id = "alert-" + Date.now();
+                var cls='alert-warning';
+                var html='<div id="'+id+'" class="alert '+cls+' alert-dismissible fade show mb-1 col-10 mx-auto"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#check-circle-fill"/></svg>';
+                if(typeof title!=='undefined' &&  title!==''){
+                    html+='<h4 class="alert-title">'+title+'</h4>';
+                }
+                html += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                html +='<span class="alert-message">'+message+'</span></div>';
+                $(this).append(html);
+                setTimeout(function () { $("#"+id).alert('close'); }, 5000);
+            },
+            bs_info: function(message, title){
+                var id = "alert-" + Date.now();
+                var cls='alert-info';
+                var html='<div id="'+id+'" class="alert '+cls+' alert-dismissible fade show mb-1 col-10 mx-auto"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>';
+                if(typeof title!=='undefined' &&  title!==''){
+                    html+='<h4 class="alert-title">'+title+'</h4>';
+                }
+                html += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                html+='<span class="alert-message">'+message+'</span></div>';
+                $(this).append(html);
+                setTimeout(function () { $("#"+id).alert('close'); }, 5000);
+            },
+            bs_success: function(message, title){
+                var id = "alert-" + Date.now();
+                var cls='alert-success';
+                var html='<div id="'+id+'" class="alert '+cls+' alert-dismissible fade show mb-1 col-10 mx-auto"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>';
+                if(typeof title!=='undefined' &&  title!==''){
+                    html+='<h4 class="alert-title">'+title+'</h4>';
+                }
+                html += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                html +='<span class="alert-message">'+message+'</span></div>';
+                $(this).append(html);
+                setTimeout(function () { $("#"+id).alert('close'); }, 5000);
+            }
+
+        });
+    })(jQuery);
+
+    function showObject(o) {
+        $(o).show();
+        $(o).css("visibility", "visible");
+    }
+
+    function hideObject(o) {
+        $(o).hide();
+        $(o).css("visibility", "hidden");
+    }
+
+    $(document).ready(function () {
+       // $("#loadingModal").modal('show');
+
+        $('.volumeDial').each(function (e) {
+            var dial = this;
+            var limit = parseFloat($(dial).data("limit"));   // safety limit from the API's configuration
+            if (isNaN(limit)) limit = 98;
+
+            volumeDials[e] = dial;
+            $(dial).knob({
+                // Dragging: stop at the limit. Returning false cancels the move.
+                'change': function (v) {
+                    if (v > limit) {
+                        if (this.cv < limit) snapDialToLimit(dial, limit);
+                        return false;
+                    }
+                    setVolumeLevel(e, v, true);
+                },
+                // Release, scroll wheel and keyboard: these skip 'change', so clamp here too.
+                'release': function (v) {
+                    if (suppressVolumeSend) return;
+                    if (v > limit) {
+                        snapDialToLimit(dial, limit);
+                        return false;
+                    }
+                    setVolumeLevel(e, v, false);
+                },
+                // Draw the normal dial, then shade the part above the limit.
+                'draw': function () {
+                    this.draw();
+                    drawVolumeLimit(this, limit);
+                    return false;
+                }
+            });
+        });
+
+
+        $(".collapse").on('hide.bs.collapse', function (e) {
+            if ($(this).is(e.target)) {
+                $(this).find('.volumeDialWrapper').toggle(false);
+            }
+        });
+
+        $(".collapse").on('show.bs.collapse', function (e) {
+            if ($(this).is(e.target)) {
+                $(this).find('.volumeDialWrapper').toggle(true);
+            }
+        });
+
+        $(".refreshButton").on('click', function (e) {
+            if ($(this).is(e.target)) {
+                updateControls();
+            }
+        });
+
+        $(".powerState:checkbox").change(function () {
+            setPowerState(this);
+        });
+
+        $(".muteState:checkbox").change(function () {
+            setMuteState(this);
+        });
+
+        $(".sourceSelect").change(function () {
+            setSourceState(this);
+        });
+
+        // The server couldn't load the configuration from the API; the page already shows why.
+        if (@(string.IsNullOrEmpty(Model.StartupError) ? "false" : "true")) {
+            hideObject("#loading");
+            return;
+        }
+
+        // Don't let a request that never answers leave the page waiting (applies to async requests).
+        $.ajaxSetup({
+            timeout: 20000
+        });
+
+        //open first zone
+        $(".accordion-collapse").first().collapse("show");
+
+        // Startup, without blocking the browser: check the receiver, then load the source list,
+        // then fill the dropdowns and read every control's state. The spinner stays up until done.
+        testDeviceConnection()
+            .then(function (connected) {
+                if (!connected) return;
+                return loadSourceList().then(function () {
+                    $(".sourceSelect").each(function (i, o) { fillSourceSelect(o); });
+                    return updateControls();
+                });
+            })
+            .finally(function () {
+                hideObject("#loading");
+            });
+    });
+
+
+    // Resolves true if the receiver answers, false (after showing why) if it doesn't.
+    function testDeviceConnection() {
+        var apiCall = "@Model.RemoteWebApi" + "CheckConnectionStatus";
+
+        return new Promise(function (resolve) {
+            $.getJSON(apiCall, { }, function (json) {
+                //console.log(JSON.stringify(json));
+                if (json.systemState != "Alive") {
+                    $("#alertWrapper").bs_alert(json.response, "Error");
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            }).fail(function (jqxhr) {
+                $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+                resolve(false);
+            });
+        });
+    }
+
+    // Reads every control's state from the receiver. The returned promise settles once all the
+    // requests have finished (successfully or not); the spinner shows until then.
+    function updateControls() {
+        showObject("#loading");
+
+        var requests = [];
+
+        $(".powerState:checkbox").each(function (i, o) {
+            requests.push(updatePowerStatus(o));
+        });
+
+        $(".muteState:checkbox").each(function (i, o) {
+            requests.push(updateMuteStatus(o));
+        });
+
+        $(".volumeDial").each(function (i, o) {
+            requests.push(updateVolumeStatus(o));
+        });
+
+        $(".sourceSelect").each(function (i, o) {
+            requests.push(updateSourceSelect(o));
+        });
+
+        return Promise.allSettled(requests).then(function () {
+            hideObject("#loading");
+        });
+    }
+
+    function setSourceState(o) {
+        var z = $(o).data("zone");
+        var val = $(o).val();
+        //console.log("Setting zone " + z + " to " + val);
+        if (z == "M") {
+            setMasterSourceState(o, val);
+        }
+        else {
+            setZoneSourceState(o, val);
+        }
+    }
+
+    function setMasterSourceState(o, v) {
+        var apiCall = "@Model.RemoteWebApi" + "SetMasterSource";
+
+        $.getJSON(apiCall, { source: v }, function (json) {
+            //console.log(JSON.stringify(json));
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+    }
+
+    function setZoneSourceState(o, v) {
+        var apiCall = "@Model.RemoteWebApi" + "SetZoneSource";
+        var z = $(o).data("zone");
+
+        $.getJSON(apiCall, { zoneId: z, source: v }, function (json) {
+           // console.log(JSON.stringify(json));
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+    }
+
+    function updateSourceSelect(o) {
+        var z = $(o).data("zone");
+        //console.log("Get source for zone " + z);
+        if (z == "M") {
+            return updateMasterSourceSelect(o);
+        }
+        else {
+            return updateZoneSourceSelect(o);
+        }
+    }
+
+    var sourceList = null;
+
+    // Loads the source list once. Always resolves; on failure the list is empty and an alert shows why.
+    function loadSourceList() {
+        var apiCall = "@Model.RemoteWebApi" + "GetSourceList";
+
+        if (sourceList) return Promise.resolve();
+
+        return new Promise(function (resolve) {
+            $.getJSON(apiCall, function (json) {
+                //console.log(JSON.stringify(json));
+                if (json.sources) {
+                    // From the device schema: every source, with its label and enabled flag.
+                    sourceList = json.sources.map(function (s) {
+                        return { id: s.id.trim(), label: s.displayName, enabled: s.enabled !== false };
+                    });
+                } else {
+                    // Older API, or a schema without a source list: what the receiver reported.
+                    sourceList = (json.responseItems || []).map(function (i) {
+                        return { id: i.name.trim(), label: i.value.trim(), enabled: true };
+                    });
+                }
+            }).fail(function (jqxhr, textStatus, error) {
+                $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+                sourceList = [];
+            }).always(function () {
+                resolve();
+            });
+        });
+    }
+
+    // Fills a source dropdown from the loaded list. Only enabled sources are offered.
+    function fillSourceSelect(o) {
+        $(o).empty();
+
+        jQuery.each(sourceList || [], function () {
+            if (this.enabled) $(o).append($('<option>', { value: this.id, text: this.label }));
+        });
+    }
+
+    // Shows the receiver's current source in a source dropdown. If that source isn't offered
+    // (disabled, or not in the list), it's added greyed out so the dropdown still shows what's
+    // actually selected; an earlier such entry is removed when the source changes.
+    function showCurrentSource(o, code) {
+        if (!code) return;
+        code = code.trim();
+
+        $(o).find('option[data-current-only]').filter(function () { return this.value !== code; }).remove();
+
+        if ($(o).find('option').filter(function () { return this.value === code; }).length === 0) {
+            var known = (sourceList || []).find(function (s) { return s.id === code; });
+            $(o).append($('<option>', { value: code, text: known ? known.label : code, disabled: true, 'data-current-only': true }));
+        }
+
+        $(o).val(code);
+    }
+
+    function updateMasterSourceSelect(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetMasterSource";
+
+        return $.getJSON(apiCall, function (json) {
+            //console.log(JSON.stringify(json));
+            showCurrentSource(o, json.source);
+        }).fail(function (jqxhr, textStatus, error) {
+            //console.log(JSON.stringify(jqxhr));
+            //console.log(textStatus);
+            //console.log(error);
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+
+    };
+
+    function updateZoneSourceSelect(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetZoneSource";
+        var z = $(o).data("zone");
+
+        return $.getJSON(apiCall, { ZoneId: z }, function (json) {
+            //console.log(JSON.stringify(json));
+            showCurrentSource(o, json.source);
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+    };
+
+
+
+    function snapDialToLimit(dial, limit) {
+        // Sets the dial to the limit; the knob's release handler then sends it to the receiver.
+        $(dial).val(Math.floor(limit)).trigger('change');
+    }
+
+    function drawVolumeLimit(knob, limit) {
+        if (!(limit < knob.o.max)) return;
+
+        // Shade from the limit (or from the current level, if the receiver is already above it)
+        // to the end of the dial. Start past the rounded end of the level arc so they don't overlap.
+        var start = knob.startAngle + knob.angle(Math.max(limit, knob.cv));
+        if (knob.cv >= limit) start += (knob.lineWidth / 2) / knob.radius;
+        var end = knob.startAngle + knob.angle(knob.o.max);
+        if (start >= end) return;
+
+        var g = knob.g;
+        g.beginPath();
+        g.lineWidth = knob.lineWidth;
+        g.lineCap = "butt";
+        g.strokeStyle = "#e8aaa8";
+        g.arc(knob.xy, knob.xy, knob.radius, start, end, false);
+        g.stroke();
+    }
+
+    function setDialFromDevice(o, level) {
+        suppressVolumeSend = true;
+        try {
+            $(o).val(level);
+            $(o).trigger('change');
+        } finally {
+            suppressVolumeSend = false;
+        }
+    }
+
+    function setVolumeLevel(e, v, useStepValue) {
+        if (suppressVolumeSend) return;
+
+        stepValue = volumeSetIncrement;
+        if (!useStepValue) stepValue = 1;
+
+        var o = volumeDials[e];
+        var z = $(o).data("zone");
+
+        if (lastVolumeStep != Math.trunc(v)) {
+            lastVolumeStep = Math.trunc(v);
+
+            if (z == "M") {
+                if (Math.trunc(v) % stepValue == 0) setMasterVolumeLevel(o, Math.round(v));
+
+            }
+            else {
+                if (Math.trunc(v) % stepValue == 0) setZoneVolumeLevel(o, Math.round(v));
+            }
+        }
+
+    }
+
+
+    function updateVolumeStatus(o) {
+        var z = $(o).data("zone");
+        if (z == "M") {
+            return updateMasterVolumeStatus(o);
+        }
+        else {
+            return updateZoneVolumeStatus(o);
+        }
+    }
+
+    function updateMasterVolumeStatus(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetMasterVolume";
+
+        return $.getJSON(apiCall, function (json) {
+            //console.log(JSON.stringify(json));
+            setDialFromDevice(o, json.level);
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+
+    };
+
+    function updateZoneVolumeStatus(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetZonePowerStatus";
+        var z = $(o).data("zone");
+
+        return $.getJSON(apiCall, { ZoneId: z }, function (json) {
+            //console.log(JSON.stringify(json));
+            setDialFromDevice(o, json.level);
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+    };
+
+
+    function setMasterVolumeLevel(o, v) {
+        var apiCall = "@Model.RemoteWebApi" + "SetMasterVolume";
+
+        $.getJSON(apiCall, { Value: v }, function (json) {
+            //console.log(JSON.stringify(json));
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+    }
+
+    function setZoneVolumeLevel(o, v) {
+        var apiCall = "@Model.RemoteWebApi" + "SetZoneVolume";
+        var z = $(o).data("zone");
+
+        $.getJSON(apiCall, { ZoneId: z, Value: v }, function (json) {
+            //console.log(JSON.stringify(json));
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+        });
+    }
+
+    function updateZonePower() {
+        //console.log("Updating zones");
+
+        // update zone power states
+        var requests = [];
+        $(".powerState:checkbox").each(function (i, o) {
+            if ($(o).data("zone") != "M") {
+                requests.push(updatePowerStatus(o));
+                //console.log("Updating zone " + $(o).data("zone"));
+            }
+        });
+
+        return Promise.allSettled(requests);
+    }
+
+
+    // Master power also changes the zones, so their status is read once the master command is done.
+    // The spinner shows until everything has finished.
+    function setPowerState(o) {
+        showObject("#loading");
+
+        var z = $(o).data("zone");
+        var done;
+        if (z == "M") {
+            done = Promise.resolve(setMasterPowerState(o)).then(updateZonePower, function () { });
+        }
+        else {
+            done = Promise.resolve(setZonePowerState(o)).catch(function () { });
+        }
+
+        done.finally(function () {
+            hideObject("#loading");
+        });
+    }
+
+    function setMasterPowerState(o) {
+        //console.log("Entering setMasterPowerState");
+        var apiCall = "@Model.RemoteWebApi" + "SetSystemPowerStandBy";
+        if (o.checked) apiCall = "@Model.RemoteWebApi" + "SetSystemPowerOn";
+
+        return $.getJSON(apiCall, function (json) {
+            //console.log(JSON.stringify(json));
+            updateMasterPowerStatus(o);
+            if (json.powerState == "On") {
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "initial"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").removeAttr("disabled");
+            }
+            else {
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+            }
+        }).fail(function( jqxhr, textStatus, error ) {
+            //console.log(JSON.stringify(jqxhr));
+            //console.log(textStatus);
+            //console.log(error);
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+        });
+
+
+    }
+
+    function setZonePowerState(o) {
+        //console.log("Entering setZonePowerState");
+        var apiCall = "@Model.RemoteWebApi" + "SetZonePowerOff";
+        if (o.checked) apiCall = "@Model.RemoteWebApi" + "SetZonePowerOn";
+        var z = $(o).data("zone");
+
+        return $.getJSON(apiCall, { ZoneId: z }, function (json) {
+            //console.log(JSON.stringify(json));
+            updateZonePowerStatus(o);
+            if (json.powerState == "On") {
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "initial"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").removeAttr("disabled");
+           }
+            else {
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+           }
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+        });
+    }
+
+    function updatePowerStatus(o) {
+        var z = $(o).data("zone");
+        if (z == "M") {
+            return updateMasterPowerStatus(o);
+        }
+        else {
+            return updateZonePowerStatus(o);
+        }
+    }
+
+    function updateMasterPowerStatus(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetSystemPowerStatus";
+
+        return $.getJSON(apiCall, function (json) {
+            if (json.powerState == "On") {
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "initial"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").removeAttr("disabled");
+                o.checked = true;
+           }
+            else {
+                o.checked = false;
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+           }
+
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+        });
+
+    };
+
+
+    function updateZonePowerStatus(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetZonePowerStatus";
+        var z = $(o).data("zone");
+
+        return $.getJSON(apiCall, { ZoneId: z }, function (json) {
+            if (json.powerState == "On") {
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "initial"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").removeAttr("disabled");
+                o.checked = true;
+           }
+            else {
+                o.checked = false;
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+                $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+           }
+
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").css({pointerEvents: "none"});
+            $(o).parents(".accordion-body").find(".muteState, .volumeDialWrapper, .sourceSelect").attr("disabled", "disabled");
+       });
+    };
+
+
+
+    function updateMuteStatus(o) {
+        var z = $(o).data("zone");
+        if (z == "M") {
+            return updateMasterMuteStatus(o);
+        }
+        else {
+            return updateZoneMuteStatus(o);
+        }
+    }
+
+    function updateZoneMuteStatus(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetZoneVolumeMute";
+        var z = $(o).data("zone");
+
+        return $.getJSON(apiCall, { ZoneId: z }, function (json) {
+            if (json.muteState == "On") {
+                o.checked = true;
+            }
+            else {
+                o.checked = false;
+            }
+
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+        });
+    };
+
+    function updateMasterMuteStatus(o) {
+        var apiCall = "@Model.RemoteWebApi" + "GetMasterVolumeMute";
+
+        return $.getJSON(apiCall, function (json) {
+            if (json.muteState == "On") {
+                o.checked = true;
+            }
+            else {
+                o.checked = false;
+            }
+
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+        });
+    };
+
+
+    function setMuteState(o) {
+        var z = $(o).data("zone");
+        if (z == "M") {
+            setMasterMuteState(o);
+        }
+        else {
+            setZoneMuteState(o);
+        }
+    }
+
+    function setMasterMuteState(o) {
+        var apiCall = "@Model.RemoteWebApi" + "SetMasterVolumeMuteOff";
+        if (o.checked) apiCall = "@Model.RemoteWebApi" + "SetMasterVolumeMuteOn";
+
+        $.getJSON(apiCall, function (json) {
+            if (json.muteState == "On") {
+                o.checked = true;
+            }
+            else {
+                o.checked = false;
+            }
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+        });
+    }
+
+    function setZoneMuteState(o) {
+        var z = $(o).data("zone");
+
+        var apiCall = "@Model.RemoteWebApi" + "SetZoneVolumeMuteOff";
+        if (o.checked) apiCall = "@Model.RemoteWebApi" + "SetZoneVolumeMuteOn";
+
+        $.getJSON(apiCall, { ZoneId: z }, function (json) {
+            if (json.muteState == "On") {
+                o.checked = true;
+            }
+            else {
+                o.checked = false;
+            }
+        }).fail(function( jqxhr, textStatus, error ) {
+            $("#alertWrapper").bs_alert(apiErrorText(jqxhr), "Error");
+            o.checked = false;
+        });
+    }
+
+
+    function sleep(milliseconds) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve({})
+            }, milliseconds);
+        })
+    }
+
+</script>

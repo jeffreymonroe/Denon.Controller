@@ -1,0 +1,15 @@
+# Normalise line endings: stored as LF in the repository, checked out as the
+# platform's native ending (CRLF on Windows).
+* text=auto
+
+*.cs      text diff=csharp
+*.cshtml  text diff=html
+*.sln     text eol=crlf
+*.csproj  text eol=crlf
+
+# Binary files
+*.png     binary
+*.ico     binary
+*.ai      binary
+*.pdf     binary
+*.pcapng  binary

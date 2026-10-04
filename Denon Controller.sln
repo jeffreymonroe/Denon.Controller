@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.10.12224.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Web.Api", "Denon.Web.Api\Denon.Web.Api.csproj", "{2928DFB8-CB67-40CF-908F-011B186A9303}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Core.Model", "Denon.Core.Model\Denon.Core.Model.csproj", "{E37A0552-EFAD-4345-89FE-0928CB74E6A9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Core.Command", "Denon.Core.Telnet\Denon.Core.Command.csproj", "{7129866A-89F8-4204-9167-C79EE782260F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Web.Remote", "Denon.Web.Remote\Denon.Web.Remote.csproj", "{D351CA95-59C1-4292-A3E1-E19947918FE8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Serial.Test", "Denon.Serial.Test\denon.serial.test\Denon.Serial.Test.csproj", "{69E694D8-068E-4A90-B626-60BBE7918D0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Denon.Telnet.Test", "Denon.Telnet.Test\Denon.Telnet.Test.csproj", "{67F01DDC-E19D-4518-A167-101191A6C2B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2928DFB8-CB67-40CF-908F-011B186A9303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2928DFB8-CB67-40CF-908F-011B186A9303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2928DFB8-CB67-40CF-908F-011B186A9303}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2928DFB8-CB67-40CF-908F-011B186A9303}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E37A0552-EFAD-4345-89FE-0928CB74E6A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E37A0552-EFAD-4345-89FE-0928CB74E6A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E37A0552-EFAD-4345-89FE-0928CB74E6A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E37A0552-EFAD-4345-89FE-0928CB74E6A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7129866A-89F8-4204-9167-C79EE782260F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7129866A-89F8-4204-9167-C79EE782260F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7129866A-89F8-4204-9167-C79EE782260F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7129866A-89F8-4204-9167-C79EE782260F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D351CA95-59C1-4292-A3E1-E19947918FE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D351CA95-59C1-4292-A3E1-E19947918FE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D351CA95-59C1-4292-A3E1-E19947918FE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D351CA95-59C1-4292-A3E1-E19947918FE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69E694D8-068E-4A90-B626-60BBE7918D0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69E694D8-068E-4A90-B626-60BBE7918D0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69E694D8-068E-4A90-B626-60BBE7918D0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69E694D8-068E-4A90-B626-60BBE7918D0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67F01DDC-E19D-4518-A167-101191A6C2B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67F01DDC-E19D-4518-A167-101191A6C2B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67F01DDC-E19D-4518-A167-101191A6C2B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67F01DDC-E19D-4518-A167-101191A6C2B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F5202B5C-45FD-412B-8A01-6DB8D3BC6036}
+	EndGlobalSection
+EndGlobal

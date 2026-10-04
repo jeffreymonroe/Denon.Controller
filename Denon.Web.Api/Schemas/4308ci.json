@@ -1,0 +1,368 @@
+{
+  "model": "AVR-4308USA",
+  "manufacturer": "denon",
+  "configuration": {
+    "zones": [
+      {
+        "id": "M",
+        "default": "Master Zone",
+        "name": "Family Room"
+      },
+      {
+        "id": "2",
+        "default": "Zone 2",
+        "name": "Backyard"
+      },
+      {
+        "id": "3",
+        "default": "Zone 3",
+        "name": "Garage"
+      }
+    ],
+    "sources": [
+      { "id": "PHONO", "default": "PHONO", "name": "", "enabled": false },
+      { "id": "CD", "default": "CD", "name": "Raspotify", "enabled": true },
+      { "id": "TUNER", "default": "TUNER", "name": "", "enabled": false },
+      { "id": "DVD", "default": "DVD", "name": "", "enabled": false },
+      { "id": "HDP", "default": "HDP", "name": "", "enabled": false },
+      { "id": "TV/CBL", "default": "TV/CBL", "name": "", "enabled": false },
+      { "id": "SAT", "default": "SAT", "name": "", "enabled": false },
+      { "id": "VCR", "default": "VCR", "name": "", "enabled": false },
+      { "id": "DVR", "default": "DVR", "name": "Smart TV", "enabled": true },
+      { "id": "V.AUX", "default": "V.AUX", "name": "", "enabled": false },
+      { "id": "NET/USB", "default": "NET/USB", "name": "", "enabled": false },
+      { "id": "XM", "default": "XM", "name": "", "enabled": false },
+      { "id": "HDRADIO", "default": "RADIO", "name": "", "enabled": false }
+    ]
+  },
+  "commands": [
+    {
+      "name": "GetSystemModel",
+      "command": "SYMO\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": "^(SYMO(?<model>.+))",
+      "responseElements": [
+        {
+          "name": "model",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetSystemPowerOn",
+      "command": "PWON\r",
+      "timeout": 350,
+      "terminator": "(.*[\n|\r]){3}",
+      "responseLayout": "^(PW(?<pw_status>.+))|^(ZM(?<zonem_status>.+))|^(PS(?<parameter_settings>.+))",
+      "responseElements": [
+        {
+          "name": "pw_status",
+          "value": ""
+        },
+        {
+          "name": "zonem_status",
+          "value": ""
+        },
+        {
+          "name": "parameter_settings",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "CheckConnectionStatus",
+      "command": "PW?\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": "^(PW(?<system_status>.+))",
+      "responseElements": [
+        {
+          "name": "system_status",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetSystemPowerStandBy",
+      "command": "PWSTANDBY\r",
+      "timeout": 350,
+      "terminator": "(.*[\n|\r]){2}",
+      "responseLayout": "^(PW(?<pw_status>.+))|^(ZM(?<zonem_status>.+))",
+      "responseElements": [
+        {
+          "name": "pw_status",
+          "value": ""
+        },
+        {
+          "name": "zonem_status",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "GetSystemPowerStatus",
+      "command": "PW?\r",
+      "timeout": 500,
+      "terminator": "(.*[\n|\r]){12}",
+      "responseLayout": "^(PW(?<pw_status>.+))",
+      "responseElements": [
+        {
+          "name": "pw_status",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "GetZonePowerStatus",
+      "command": "Z{0}?\r",
+      "timeout": 500,
+      "terminator": "(.*[\n|\r]){12}",
+      "responseLayout": "^(PW(?<pw_status>.+))|^(Z{0}(?<volume>\\d+))|^(Z{0}(?<zone_status>(OFF|ON|STANDBY)))|^(PS(?<parameter_settings>.+))",
+      "responseElements": [
+        {
+          "name": "pw_status",
+          "value": ""
+        },
+        {
+          "name": "volume",
+          "value": ""
+        },
+        {
+          "name": "zone_status",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetZonePowerOn",
+      "command": "Z{0}ON\r",
+      "timeout": 250,
+      "terminator": "(.*[\n|\r]){12}",
+      "responseLayout": "^(PW(?<pw_status>.+))|^(Z{0}(?<volume>\\d+))|^(Z{0}(?<zone_status>(OFF|ON|STANDBY)))|^(PS(?<parameter_settings>.+))",
+      "responseElements": [
+        {
+          "name": "zone_status",
+          "value": ""
+        },
+        {
+          "name": "pw_status",
+          "value": ""
+        },
+        {
+          "name": "volume",
+          "value": ""
+        },
+        {
+          "name": "parameter_settings",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetZonePowerOff",
+      "command": "Z{0}OFF\r",
+      "timeout": 350,
+      "terminator": "(.*[\n|\r]){12}",
+      "responseLayout": "^(PW(?<pw_status>.+))|^(Z{0}(?<volume>\\d+))|^(Z{0}(?<zone_status>(OFF|ON|STANDBY)))|^(PS(?<parameter_settings>.+))",
+      "responseElements": [
+        {
+          "name": "zone_status",
+          "value": ""
+        },
+        {
+          "name": "pw_status",
+          "value": ""
+        },
+        {
+          "name": "volume",
+          "value": ""
+        },
+        {
+          "name": "parameter_settings",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "GetMasterVolume",
+      "command": "MV?\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){2}",
+      "responseLayout": "^(MVMAX\\s(?<volume_max>\\d+))|^(MV(?<volume>\\d+))",
+      "responseElements": [
+        {
+          "name": "volume",
+          "value": ""
+        },
+        {
+          "name": "volume_max",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetMasterVolume",
+      "command": "MV{0}\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){2}",
+      "responseLayout": "^(MVMAX\\s(?<volume_max>\\d+))|^(MV(?<volume>\\d+))",
+      "responseElements": [
+        {
+          "name": "volume",
+          "value": ""
+        },
+        {
+          "name": "volume_max",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "GetMasterVolumeMute",
+      "command": "MU?\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": "^(MU(?<mute>.+))",
+      "responseElements": [
+        {
+          "name": "mute",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetMasterVolumeMute",
+      "command": "MU{0}\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": "^(MU(?<mute>.+))",
+      "responseElements": [
+        {
+          "name": "mute",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "GetZoneVolumeMute",
+      "command": "Z{0}MU?\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": "^(Z{0}MU(?<mute>.+))|^(Z{0}(?<mute>.+))",
+      "responseElements": [
+        {
+          "name": "mute",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetZoneVolumeMute",
+      "command": "Z{0}MU{1}\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": "^(Z{0}MU(?<mute>.+))",
+      "responseElements": [
+        {
+          "name": "mute",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetZoneVolume",
+      "command": "Z{0}{1}\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": "^(Z{0}(?<volume>\\d+))",
+      "responseElements": [
+        {
+          "name": "volume",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "GetSourceList",
+      "command": "SSFUN ?\r",
+      "timeout": 600,
+      "terminator": "(.*[\n|\r]){12}",
+      "responseLayout": "^(SSFUN(?<name>[\\w\\/\\\\\\.]*)\\s+(?<value>.*))",
+      "responseCaptureType": "CaptureArray",
+      "responseElements": [
+      ]
+    },
+    {
+      "name": "GetSourceListDefault",
+      "command": "SSSOD ?\r",
+      "timeout": 600,
+      "terminator": "(.*[\n|\r]){12}",
+      "responseLayout": "^(SSSOD(?<name>[\\w\\/\\\\\\.]*)\\s+(?<value>))",
+      "responseCaptureType": "CaptureArray",
+      "responseElements": [
+      ]
+    },
+    {
+      "name": "GetMasterSource",
+      "command": "SI?\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){2}",
+      "responseLayout": "^(SI(?<source>\\w+))|^(SV(?<video>.*))",
+      "responseElements": [
+        {
+          "name": "source",
+          "value": ""
+        },
+        {
+          "name": "video",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetMasterSource",
+      "command": "SI{0}\r",
+      "timeout": 100,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": ".*",
+      "responseElements": [
+      ]
+    },
+    {
+      "name": "GetZoneSource",
+      "command": "Z{0}?\r",
+      "timeout": 225,
+      "terminator": "(.*[\n|\r]){4}",
+      "responseLayout": "^(Z{0}(?<volume>\\d+)\\s*$)|^(Z{0}(?<power>(ON|OFF|STANDBY))\\s*$)|^(Z{0}(?!MU|CS|CV|SLP|PS|QUICK|HPF)(?<source>[\\w\\/\\.]+))|^(SV(?<video>\\w+))",
+      "responseCaptureType": "NamedGroups",
+      "responseElements": [
+        {
+          "name": "source",
+          "value": ""
+        },
+        {
+          "name": "volume",
+          "value": ""
+        },
+        {
+          "name": "power",
+          "value": ""
+        },
+        {
+          "name": "video",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "SetZoneSource",
+      "command": "Z{0}{1}\r",
+      "timeout": 100,
+      "terminator": "(.*[\n|\r]){1}",
+      "responseLayout": ".*",
+      "responseElements": [
+      ]
+    }
+  ]
+}

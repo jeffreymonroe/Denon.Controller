@@ -1,0 +1,9 @@
+<Project>
+  <!-- Shared by every project under this folder. Bump when deploying a new build.
+       The .NET SDK adds the git commit to the informational version (e.g. 1.1.0+96afac9...),
+       which the web remote's footer shows for the API and the remote.
+       A project that sets its own <Version> (Denon.Serial.Test) keeps that instead. -->
+  <PropertyGroup>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+</Project>

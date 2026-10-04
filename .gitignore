@@ -1,0 +1,36 @@
+# ---- Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+TestResults/
+*.nupkg
+packages/
+
+# ---- Visual Studio / IDE state (per user, per machine)
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ---- OS clutter
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---- Not part of the project
+# Files saved by the Claude desktop app
+Claude outputs/
+# Separate git repository (github.com/jeffreymonroe/denon.serial.test)
+Denon.Serial.Test/
+
+# ---- Machine-specific settings (real addresses and host names)
+appsettings.*.Local.json
+Denon.Telnet.Test/Properties/launchSettings.json
+
+# ---- Kept locally, not published
+Artwork/
+Packet Capture/
+packetsender_export.ini
+*.pdf
