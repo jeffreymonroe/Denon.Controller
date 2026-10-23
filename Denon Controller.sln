@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Core.Command", "Denon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Web.Remote", "Denon.Web.Remote\Denon.Web.Remote.csproj", "{D351CA95-59C1-4292-A3E1-E19947918FE8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Serial.Test", "Denon.Serial.Test\denon.serial.test\Denon.Serial.Test.csproj", "{69E694D8-068E-4A90-B626-60BBE7918D0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Denon.Serial.Test", "Denon.Serial.Test\Denon.Serial.Test.csproj", "{69E694D8-068E-4A90-B626-60BBE7918D0F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Denon.Telnet.Test", "Denon.Telnet.Test\Denon.Telnet.Test.csproj", "{67F01DDC-E19D-4518-A167-101191A6C2B6}"
 EndProject

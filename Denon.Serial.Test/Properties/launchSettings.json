@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Denon.Serial.Test": {
+      "commandName": "Project",
+      "commandLineArgs": "-n COM20"
+    }
+  }
+}
