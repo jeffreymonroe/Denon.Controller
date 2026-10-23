@@ -76,5 +76,5 @@ This project utilizes open source code. The following are some of the repositori
 - [commandline](https://github.com/commandlineparser/commandline)
 
 ## License
-This repository is open source software and licensed under the terms of [GNU GENERAL PUBLIC LICENSE](LICENSE).
+Licensed under the [GNU General Public License v3.0](../LICENSE), like the rest of this repository.
 

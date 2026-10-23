@@ -138,3 +138,7 @@ dotnet Denon.Serial.Test.dll -n /dev/ttyUSB0
 ```
 
 Both keep the last 100 commands in `~/.denon.telnet.test_history` / `~/.denon.serial.test_history`.
+
+## License
+
+GNU General Public License v3.0. See [LICENSE](LICENSE).
